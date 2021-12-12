@@ -14,7 +14,7 @@
 2. Через обозначенные интервалы обьект публикует min-avg-max значения через стандартизированное API
 3. Данные потребляются внутри (in-proc) и/или вне (out-of-proc) приложения обработчиками
 
-![Scheme from Microsoft article on EventCounters](img/microsoft.png)
+![Scheme from Microsoft article on EventCounters](img/microsoft.PNG)
 
 ## Как каунтеры выглядят в коде ?
 Вот основные действующие классы:
@@ -102,7 +102,7 @@
 dotnet-counters monitor --process-id <our process id>
 ```
 
-![Default NET counters](img/default-counters.png)
+![Default NET counters](img/default-counters.PNG)
 
 Как мы можем видеть, приложение выводит очень много значений разных каунтеров. NET и ASP NET Core по умолчанию включают в себя множество полезных каунтеров, позволяющих мониторить общее состояние системы, работу GC, нагрузку памяти, процессора, состояние пула потоков, показатели выполнения ASP NET запросов. С полным списком доступных по умолчанию каунтеров можно ознакомится по [этой ссылке](https://docs.microsoft.com/ru-ru/dotnet/core/diagnostics/available-counters). Также можно подсмотреть как именно реализованы каунтеры самими Microsoft. Для этого можно изучить следующие классы в исходных кодах NET, например [тут](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Diagnostics/Tracing/RuntimeEventSource.cs) и [тут](https://github.com/dotnet/aspnetcore/blob/main/src/Hosting/Hosting/src/Internal/HostingEventSource.cs).
 
@@ -112,7 +112,7 @@ dotnet-counters monitor --process-id <our process id>
 dotnet-counters monitor --process-id <our process id> --counters TestApplication.Tracing.Monitoring
 ```
 
-![Custom application counters](img/custom-counters.png)
+![Custom application counters](img/custom-counters.PNG)
 
 Все отлично работает, поэтому можно приступать к следующей части нашей статьи.
 
@@ -169,7 +169,7 @@ void ConfigureServices(IServiceCollection services)
 
 Запускаем приложение и генерируем несколько запросов с помощью Swagger, чтобы отправить начальные данные в Application Insights.
 
-![Initial Application Insights data](img/initial-data.png)
+![Initial Application Insights data](img/initial-data.PNG)
 
 Работает! Переходим к самому интересному.
 
@@ -178,8 +178,8 @@ void ConfigureServices(IServiceCollection services)
 
 Запустим приложение, проведем стресс-тестирование с помощью jMeter и проанализируем полученные результаты.
 
-![jMeter summary](img/data-before-jmeter-summary.png)
-![Request performance view](img/data-before-request-performance.png)
+![jMeter summary](img/data-before-jmeter-summary.PNG)
+![Request performance view](img/data-before-request-performance.PNG)
 
 Сценарий jMeter для не оптимальной имплементации выполнялся 7:06 минут со средней пропускной способностью 5.9 запросов в секунду. На графике среднего времени выполнения запроса в Application Insights (доступен через вкладку *Overview* Application Insights ресурса) вначале мы видим пик (несмотря на то что потоки в jMeter добавлялись постепенно на протяжении 30 секунд), после следует пик в середине и за ним следует еще один пик, который просто не успел сформироватся до окончания стресс-теста. Разработчик, столкнувшийся с такими показателями для настолько простого запроса может очень удивиться. "Как так, запрос же совсем ничего не делает, а график показывает какие то пики и спады. Очень странно". Конечно, среднестатистический API метод скорее всего будет выглядеть сложнее и будет иметь как минимум несколько зависимостей, но от возникновения подобной странной и сложно обьяснимой картины никто не застрахован, с чем мне и пришлось столкнутся. Первой мыслью было "Ничего не понятно, нужно больше данных".
 
@@ -190,12 +190,12 @@ void ConfigureServices(IServiceCollection services)
 - **желтый** - количество потоков в пуле (*System.Runtime|ThreadPool Thread Count*)
 - **темно синий** - размер очереди выполнения (*TestApplication.Tracing.Monitoring|Worker queue length*)
 
-![Metrics](img/data-before-metrics.png)
+![Metrics](img/data-before-metrics.PNG)
 
 Сопоставив графики мы можем с большой точностью определить что же произошло. Получая все больше запросов на обработку, текущего размера пула потоков становится недостаточно, что ведет к скоплению потоков в очереди. Обработка запроса при этом замедляется, что видно на графике среднего времени выполнения в виде пика. После пулл потоков расширяется, потоков становится больше, очередь пула потоков одновременно с этим уменьшается и обработка запроса становится снова быстрой, пока в системе хватает потоков. Далее, так как мы заполняем очередь обработки быстрее чем успеваем ее освобождать, ситуация вновь повторяется в виде пика. При этом на графике хорошо видно что рост количества потоков в пуле коррелирует с ростом очереди обработки. Bingo! Виновник найден и его необходимо починить. Меняем имплементацию на не блокирующий вызов `Task.Delay(10 000)`, меняя вызов метода на `DoWorkAsync` и повторяем наш стресс тест.
 
-![jMeter summary](img/data-after-jmeter-summary.png)
-![Request performance view](img/data-after-request-performance.png)
+![jMeter summary](img/data-after-jmeter-summary.PNG)
+![Request performance view](img/data-after-request-performance.PNG)
 
 В результате правильных изменений в коде, который напрямую не относится к API методу, нам удалось добится средней пропускной способности в 84.5 запроса в секунду, а сценарий jMeter на 2500 запросов завершился всего за 29 секунд. Иногда хорошо продуманные и предсказуемые изменения могут давать позитивный эффект, но не за счет механизмов на которые вы изначально расчитывали, или еще хуже - создавать неожиданные побочные эффекты. Чтобы окончательно убедиться что мы сделали именно то что собирались, нам нужно подтвердить или опровергнуть нашу изначальную гипотезу. Обратимся к метрикам.
 
@@ -204,11 +204,11 @@ void ConfigureServices(IServiceCollection services)
 - **желтый** - количество потоков в пуле (*System.Runtime|ThreadPool Thread Count*)
 - **темно синий** - размер очереди выполнения (*TestApplication.Tracing.Monitoring|Worker queue length*)
 
-![Metrics](img/data-after-metrics.png)
+![Metrics](img/data-after-metrics.PNG)
 
 Как видим количество потоков в очереди за время выполнения минимально а количество рабочих потоков в пуле не превышает 25. К сожалению в выборку не попали значения размера очереди выполнения, так как тест окончился слишком быстро и значения не попали в интервал. Чтобы результаты были более наглядными, мы можем увеличить время тестирования одновременно увеличив нагрузку на приложение. Для этого в jMeter увеличим число потоков до 100, а число итераций до 500. Результаты, на мой взгляд, выглядят более чем убедительно.
 
-![Metrics](img/data-after-extended-metrics.png)
+![Metrics](img/data-after-extended-metrics.PNG)
 
 Гипотеза подтверждена и мы можем быть спокойны что решили проблему именно так, как планировали.
 
