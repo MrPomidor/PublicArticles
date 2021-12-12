@@ -1,0 +1,29 @@
+про консольный инструмент dotnet-counters
+https://docs.microsoft.com/ru-ru/dotnet/core/diagnostics/dotnet-counters
+
+overview о том что такое event counters
+https://docs.microsoft.com/ru-ru/dotnet/core/diagnostics/event-counters
+
+стандартные счетчики net 
+https://docs.microsoft.com/ru-ru/dotnet/core/diagnostics/available-counters
+
+гайд по измерению производительности с помощью EventSource/EventCounters
+https://docs.microsoft.com/ru-ru/dotnet/core/diagnostics/event-counter-perf
+
+пример(ы) имплементации
+https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Diagnostics/Tracing/RuntimeEventSource.cs
+
+небольшой туториал по eventCounters 
+https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.Tracing/documentation/EventCounterTutorial.md
+
+детальная статья по EventPipes и counters
+https://medium.com/criteo-engineering/net-core-counters-internals-how-to-integrate-counters-in-your-monitoring-pipeline-5354cd61b42e
+
+еще статья по counters
+https://www.stefangeiger.ch/2020/05/07/dotnet-diagnostics-tools-counters.html
+
+настройка application insights в asp net core
+https://docs.microsoft.com/ru-ru/azure/azure-monitor/app/asp-net-core
+
+настройка eventcounters в azure application insights
+https://docs.microsoft.com/en-us/azure/azure-monitor/app/eventcounters
