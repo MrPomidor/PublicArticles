@@ -108,7 +108,7 @@ app.MapGet("/daysAgo", (StringArray myParameter) =>
 
 ![JMeter. Empty query parameter](img/jmeter-empty-query-parameters.PNG)
 
-Решается ли задача с помощью JMeter ? Да? Но уже [другим способом](https://loadium.com/blog/how-to-add-a-variable-number-of-parameters-in-apache-jmeter), для нахождения которого вы потратите определенное время и этот способ скорее всего будет включать в себя написание скриптов на Java, Groovy или JavaScript.
+Решается ли задача с помощью JMeter ? Да ! Но уже [другим способом](https://loadium.com/blog/how-to-add-a-variable-number-of-parameters-in-apache-jmeter), для нахождения которого вы потратите определенное время и этот способ скорее всего будет включать в себя написание скриптов на Java, Groovy или JavaScript.
 
 При использовании NBomber вы сможете достаточно быстро решить проблему, просто переписав логику формирования query string на более привычном вам языке:
 
@@ -206,7 +206,7 @@ else
 
 Для написания теста нам необходимы части arrange, act и assert. `NBomber.Run` будет использоваться как act, а возвращаемый этим методом объект статистики поможет нам написать assert. Но как нам написать arrange чтобы NBomber мог тестировать наше приложение из интеграционного теста без развертывания ? 
 
-APS NET предоставляет удобный способ интеграционного тестирования вашего API с помощью класса `WebApplicationFactory` из пакета `Microsoft.AspNetCore.Mvc.Testing`. Этот класс используя `Program.cs` создает экземпляр вашего приложения в памяти и вы можете обращаться к нему, создав `HttpClient` с помощью метода `CreateClient()`. Для того чтобы трансформировать наш standalone NBomber сценарий с endpoint-ом "/datenow" в xUnit интеграционный тест, нам всего лишь нужно заменить экземпляр `HttpClient`, на тот что возвращает `WebApplicationFactory`.
+ASP NET предоставляет удобный способ интеграционного тестирования вашего API с помощью класса `WebApplicationFactory` из пакета `Microsoft.AspNetCore.Mvc.Testing`. Этот класс используя `Program.cs` создает экземпляр вашего приложения в памяти и вы можете обращаться к нему, создав `HttpClient` с помощью метода `CreateClient()`. Для того чтобы трансформировать наш standalone NBomber сценарий с endpoint-ом "/datenow" в xUnit интеграционный тест, нам всего лишь нужно заменить экземпляр `HttpClient`, на тот что возвращает `WebApplicationFactory`.
 
 ```csharp
 internal class DateNowWebApplicationFactory : WebApplicationFactory<Program> { }
