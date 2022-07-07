@@ -21,9 +21,11 @@
 Статья, на мой взгляд, может быть интересна всем C#-разработчикам, а вопросы внедрения и конфигурации — разработчикам на lead-позициях.
 
 ## NBomber как альтернатива JMeter для .NET разработчика
-[Source](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.md)
+[Source:RU](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.md)
+[Source:EN](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.en.md)
 
 [Published: Habr](https://habr.com/ru/post/664824/)
+[Published: Medium](https://medium.com/@anton_shyrokykh/nbomber-as-an-alternative-to-jmeter-for-net-developer-432040b91763)
 
 Как и многие разработчики, впервые столкнувшиеся с нагрузочным тестированием, я начал с JMeter. Для ознакомления и простых сценариев JMeter полностью меня устраивал, но с усложнением задач и потребностью в большем контроле я начал задумываться о поиске более удобной альтернативы. Особенно хотелось чтобы инструмент легко адаптировался или уже был адаптирован под экосистему .NET.
 
