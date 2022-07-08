@@ -75,6 +75,7 @@ public void ApplicationLogic()
 - GET запрос по Id с данными из нескольких связанных таблиц (JOIN-s). *Get product with model and product category by id*
 - GET запрос страницы с данными из одной таблицы. *Get products page*
 - GET запрос страницы с данными из нескольких связанных таблиц (JOIN-s). *Get products page with model and product category datas*
+- POST запрос на создание. *Create product*
 - PUT запрос на редактирование. *Edit product name*
 
 Нам понадобится реализовать API несколько раз, используя разные имплементации `IProductsRepository` на базе EF или Dapper для доступа к данным. Для полноценного нагрузочного тестирования мы будем использовать NBomber поочередно для всех перечисленных сценариев. Подробнее о NBomber и работе с ним можно ознакомится в [этой статье](https://habr.com/ru/post/664824/). Для более быстрых локальных тестов в некоторых случаях мы будем использовать [BenchmarkDotNet сценарии](https://github.com/MrPomidor/EFCorePerformanceTipsDemo/tree/master/src/Solution/Tests/Benchmarks), которые будут повторять наше API в миниатюре, вызывая разные реализации интерфейса `IProductsRepository` для EF, Dapper и вариаций EF с различными улучшениями:
@@ -116,9 +117,10 @@ public async Task GetProduct_Benchmark()
 |Get detailed product by Id|6180,5|7439,9|
 |Get products page|3320,7|4341,2|
 |Get detailed products page|1174,8|954,8|
+|Create product|2146,2|3967,9|
 |Edit product|1859,8|4371,7|
 
-Как видим в данной конфигурации EF на **19-30** процентов уступает Dapper в большинстве сценариев для чтения, и значительно уступает в сценарии редактирования. Теперь мы имеем точку отсчета и можем приступить к работе над улучшениями.
+Как видим в данной конфигурации EF на **19-30** процентов уступает Dapper в большинстве сценариев для чтения, и значительно уступает в сценариях создания и редактирования. Теперь мы имеем точку отсчета и можем приступить к работе над улучшениями.
 
 ## DbContext pooling
 Для повышения производительности при работе с EF нам необходимо постепенно уменьшать влияние промежуточных этапов которые мы описали ранее, уменьшая количество аллокации, повторных вычислений и по возможности делая часть вычислений наперед (pre-calculation). Microsoft [предлагает](https://docs.microsoft.com/en-us/ef/core/performance/advanced-performance-topics#dbcontext-pooling) использовать пул для объектов типа `DbContext`. Плюсы этого решения очевидны - переиспользование "тяжелых" объектов уменьшат давление на GC что будет заметно при интенсивной нагрузке. Также среди плюсов стоит отметить легкость в конфигурации - для настройки пулинга вам необходимо поменять лишь одну строку в конфигурации приложения, заменив вызов `AddDbContext` на `AddDbContextPool` в Program.cs. Ваш код доступа к данным (в нашем случае реализация `IProductsRepository`) останется нетронутым. Однако стоит учитывать что ваш `DbContext` по сути становится синглтоном и не должен сохранять никакого состояния между использованиями. Тем не менее если у вас возникает необходимость работать с данными scoped контекста, способ это сделать был [предусмотрен и описан](https://docs.microsoft.com/en-us/ef/core/performance/advanced-performance-topics#managing-state-in-pooled-contexts) разработчиками EF. Также важно предусмотреть достаточно большой размер пула, так как при превышении его размера будут создаваться новые экземпляры `DbContext`.
@@ -247,6 +249,7 @@ public static void AddEfCore(this IServiceCollection services, IConfiguration co
 
 |Scenario name|EF Default (ms)|EF Disable concurrency check (ms)|EF Context Pooling (ms)|EF Context Pooling and Disable concurrency check (ms)|
 |---|---|---|---|---|
+|Create|2,015.9|2,031.8|1,867.9|1,876.7|
 |Edit|2,404.7|2,400.6|2,245.6|2,258.2|
 |Get by Id|1,067.5|1,055.8|859.2|886.6|
 |Get by Id full|1,186.6|1,246.2|984.8|973.0|
@@ -270,11 +273,12 @@ public static void AddEfCore(this IServiceCollection services, IConfiguration co
 |Get detailed product by Id|6180,5|7297,5|7439,9|
 |Get products page|3320,7|4165,5|4341,2|
 |Get detailed products page|1174,8|1306,2|954,8|
+|Create product|2146,2|2279,1|3967,9|
 |Edit product|1859,8|2472,0|4371,7|
 
-Согласно результатам тестирования всех трех версий приложения, мы видим что улучшения для EF позволили на **7-25** процентов улучшить результаты по сравнению с версией EF "из коробки". Также значительно сократился разрыв с Dapper и теперь Dapper превосходит EF в среднем на **1.5-4.2** процента в большинстве сценариев на чтение.
+Согласно результатам тестирования всех трех версий приложения, мы видим что улучшения для EF позволили на **6-25** процентов улучшить результаты по сравнению с версией EF "из коробки". Также значительно сократился разрыв с Dapper и теперь Dapper превосходит EF в среднем на **1.5-4.2** процента в большинстве сценариев на чтение.
 
-К сожалению, мы также увидели что получить схожую с Dapper производительность для сценариев с редактированием, при этом сохраняя изоляцию C# программиста от SQL кода, увы не выйдет. Dapper все еще превосходит EF на **76** процентов в этом сценарии. Однако стоит отметить что EF конечно же дает программисту возможность вручную писать SQL код с помощью `DbContext.Database.ExecuteSqlRaw`. Таким образом вы сможете оптимизировать узкое место, не подключая при этом сторонних библиотек кроме EF. Результаты бенчмарка показывают что производительность EF `ExecuteSqlRaw` почти идентична коду, написанному на Dapper:
+К сожалению, мы также увидели что получить схожую с Dapper производительность для сценариев с редактированием и созданием, при этом сохраняя изоляцию C# программиста от SQL кода, увы не выйдет. Dapper все еще превосходит EF на **76** процентов в редактировании и на **74** процента в создании. Однако стоит отметить что EF конечно же дает программисту возможность вручную писать SQL код с помощью `DbContext.Database.ExecuteSqlRaw`. Таким образом вы сможете оптимизировать узкое место, не подключая при этом сторонних библиотек кроме EF. Результаты бенчмарка показывают что производительность EF `ExecuteSqlRaw` почти идентична коду, написанному на Dapper для обоих сценариев:
 
 ```csharp
 public async Task EditProductName(int productId, string productName)
@@ -291,11 +295,38 @@ public async Task EditProductName(int productId, string productName)
 |---|---|---|
 |Edit_Default|2,404.7|70|
 |Edit_CombinedImprovements|1,780.5|21|
-|Edit_ContextPoolingRawSqlUpdate|920.5|4|
+|Edit_ContextPoolingRawSql|940.6|4|
 |Edit_Dapper|916.6|3|
 
+```csharp
+public async Task<int> CreateProduct(Product product)
+{
+    var productId = await _context.Database.ExecuteSqlRawAsync(@"INSERT INTO [Production].[Product]
+        (Name, ProductNumber, SafetyStockLevel, ReorderPoint, StandardCost, ListPrice, Class, Style, Color, SellStartDate, DaysToManufacture)
+    VALUES
+        ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10})
+    SELECT CAST(SCOPE_IDENTITY() as int)",
+    product.Name, product.ProductNumber, product.SafetyStockLevel, product.ReorderPoint, product.StandardCost, product.ListPrice, 
+    product.Class, product.Style, product.Color, product.SellStartDate, product.DaysToManufacture);
+
+    return productId;
+}
+```
+
+|Benchmark name|Mean (ms)|Allocated (MB)|
+|---|---|---|
+|Create_Default|2,015.9|77|
+|Create_ContextPoolingRawSql|947.9|9|
+|Create_Dapper|941.3|7|
+
+Стоит также добавить что в [дорожной карте](https://docs.microsoft.com/en-us/ef/core/what-is-new/ef-core-7.0/plan#performance-of-database-inserts-and-updates) для следующей версии EF планируется провести оптимизацию change-tracking механизма и улучшить производительность сценариев Insert и Update:
+
+> For EF7, we plan to focus on performance related to database inserts and updates. This includes performance of change-tracking queries, performance of `DetectChanges`, and performance of the insert and update commands sent to the database.
+
+Мы можем следить за ходом разработки на [Github](https://github.com/dotnet/efcore/issues/26797) и надеятся что со следующим релизом разрыв с Dapper в этих сценариях будет существенно сокращен.
+
 ## Итоги
-Как мы смогли увидеть, EF Core на момент июля 2022 года при правильном использовании может показывать результаты сопоставимые с Dapper для большинства сценариев, при этом сохраняя свои преимущества в виде генерирования корректного и безопасного SQL кода, используя строго типизированные LINQ выражения и манипуляции C# объектами в памяти для редактирования. На мой взгляд, и как показывает практика, EF Core последней версии вполне применим для использования в высоконагруженных системах. Учитывая богатый функционал, поддержку и популярность, а также то что EF Core и платформа NET не стоят на месте и с каждым релизом становятся лучше в плане производительности, вы не ошибетесь выбрав для разработки EF Core. Надеюсь что статья была вам полезна.
+Как мы смогли увидеть, EF Core на момент июля 2022 года при правильном использовании может показывать результаты сопоставимые с Dapper для большинства сценариев для чтения, при этом сохраняя свои преимущества в виде генерирования корректного и безопасного SQL кода, используя строго типизированные LINQ выражения. Пока что EF все еще значительно уступает Dapper в Insert и Update сценариях при использовании C# обьектов для редактирования, но у разработчиков есть возможность при необходимости повысить производительность при помощи raw sql подхода. Мы можем ожидать уменьшение разрыва между EF и Dapper в этих сценариях уже в следующем релизе. На мой взгляд, и как показывает практика, EF Core последней версии вполне применим для использования в высоконагруженных системах. Учитывая богатый функционал, поддержку и популярность, а также то что EF Core и платформа NET не стоят на месте и с каждым релизом становятся лучше в плане производительности, вы не ошибетесь выбрав для разработки EF Core. Надеюсь что статья была вам полезна.
 
 Спасибо за внимание !
 
