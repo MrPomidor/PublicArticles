@@ -54,9 +54,11 @@
 Эта статья может быть полезна разработчикам, которые ищут пути повышения производительности веб приложения, а также всем разработчикам, заинтересованным в расширении своего профессионального инструментария.
 
 ## Entity Framework Core и высокая производительность
-[Source](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.ru.md)
+[Source:RU](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.ru.md)
+[Source:EN](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.en.md)
 
 [Published: Habr](https://habr.com/ru/post/675310/)
+[Published: Medium](https://medium.com/@anton_shyrokykh/entity-framework-core-and-high-performance-b68e107972d4)
 
 Entity Framework Core является рекомендованным и самым популярным средством взаимодействия с реляционными базами данных на платформе ASP NET Core. Это мощный инструмент который подходит для большинства сценариев, но, как и любой другой инструмент имеет свои ограничения. Долгое время бытовало мнение (и не безосновательно) что Entity Framework не подходит для высоконагруженных систем и в таких сценариях лучше использовать Dapper. Но время идет и Entity Framework развивается, в том числе в плане оптимизации. Помимо улучшения производительности самой платформы .NET, Entity Framework Core для NET 6 имеет ряд настроек и возможностей, призванных значительно улучшить производительность. В этой статье мы рассмотрим Entity Framework Core с точки зрения производительности и сравним его с Dapper используя актуальные версии на момент июля 2022 года. Посмотрим насколько рекомендация "перепишите все на Dapper" актуальна :)
 
