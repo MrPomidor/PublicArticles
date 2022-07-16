@@ -21,11 +21,11 @@
 Статья, на мой взгляд, может быть интересна всем C#-разработчикам, а вопросы внедрения и конфигурации — разработчикам на lead-позициях.
 
 ## NBomber как альтернатива JMeter для .NET разработчика
-[Source:RU](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.md)
-[Source:EN](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.en.md)
+- [Source:RU](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.md)
+- [Source:EN](articles/2022-nbomber-vs-jmeter-for-dotnet-developer/nbomber-vs-jmeter-for-dotnet-developer.en.md)
 
-[Published: Habr](https://habr.com/ru/post/664824/)
-[Published: Medium](https://medium.com/@anton_shyrokykh/nbomber-as-an-alternative-to-jmeter-for-net-developer-432040b91763)
+- [Published: Habr](https://habr.com/ru/post/664824/)
+- [Published: Medium](https://medium.com/@anton_shyrokykh/nbomber-as-an-alternative-to-jmeter-for-net-developer-432040b91763)
 
 Как и многие разработчики, впервые столкнувшиеся с нагрузочным тестированием, я начал с JMeter. Для ознакомления и простых сценариев JMeter полностью меня устраивал, но с усложнением задач и потребностью в большем контроле я начал задумываться о поиске более удобной альтернативы. Особенно хотелось чтобы инструмент легко адаптировался или уже был адаптирован под экосистему .NET.
 
@@ -34,11 +34,11 @@
 Эта статья предназначена для .NET разработчиков, которые хотят пополнить свой инструментарий удобным инструментом для нагрузочного тестирования, а также тем кто рассматривает альтернативы JMeter для экосистемы .NET.
 
 ## Простые шаги по повышению производительности ASP NET Core приложения
-[Source:RU](articles/2022-improving-asp-net-core-performance/improving-asp-net-core-performance.md)
-[Source:EN](articles/2022-improving-asp-net-core-performance/improving-asp-net-core-performance.en.md)
+- [Source:RU](articles/2022-improving-asp-net-core-performance/improving-asp-net-core-performance.md)
+- [Source:EN](articles/2022-improving-asp-net-core-performance/improving-asp-net-core-performance.en.md)
 
-[Published: Habr](https://habr.com/ru/post/669176/)
-[Published: Medium](https://medium.com/@anton_shyrokykh/simple-steps-towards-boosting-asp-net-core-application-performance-82c564bdf092)
+- [Published: Habr](https://habr.com/ru/post/669176/)
+- [Published: Medium](https://medium.com/@anton_shyrokykh/simple-steps-towards-boosting-asp-net-core-application-performance-82c564bdf092)
 
 Разработка сложной системы предполагает что вы, рано или поздно, столкнетесь с вопросом повышения производительности вашего приложения. Выполнив поиск по разным источникам вы найдете множество рекомендаций по улучшению производительности как для конкретных ситуаций и узких мест, так и применимых для всего приложения. В этой статье мы рассмотрим те рекомендации, которые призваны улучшить производительность всего приложения при минимальных трудозатратах. Мы протестируем оказываемый на приложение эффект, вычислим возможный прирост производительности от каждой из них и рассмотрим нет ли подводных камней, которые стоит учитывать.
 
@@ -54,11 +54,11 @@
 Эта статья может быть полезна разработчикам, которые ищут пути повышения производительности веб приложения, а также всем разработчикам, заинтересованным в расширении своего профессионального инструментария.
 
 ## Entity Framework Core и высокая производительность
-[Source:RU](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.ru.md)
-[Source:EN](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.en.md)
+- [Source:RU](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.ru.md)
+- [Source:EN](articles/2022-entityframeworkcore-and-high-performance/entityframeworkcore-and-high-performance.en.md)
 
-[Published: Habr](https://habr.com/ru/post/675310/)
-[Published: Medium](https://medium.com/@anton_shyrokykh/entity-framework-core-and-high-performance-b68e107972d4)
+- [Published: Habr](https://habr.com/ru/post/675310/)
+- [Published: Medium](https://medium.com/@anton_shyrokykh/entity-framework-core-and-high-performance-b68e107972d4)
 
 Entity Framework Core является рекомендованным и самым популярным средством взаимодействия с реляционными базами данных на платформе ASP NET Core. Это мощный инструмент который подходит для большинства сценариев, но, как и любой другой инструмент имеет свои ограничения. Долгое время бытовало мнение (и не безосновательно) что Entity Framework не подходит для высоконагруженных систем и в таких сценариях лучше использовать Dapper. Но время идет и Entity Framework развивается, в том числе в плане оптимизации. Помимо улучшения производительности самой платформы .NET, Entity Framework Core для NET 6 имеет ряд настроек и возможностей, призванных значительно улучшить производительность. В этой статье мы рассмотрим Entity Framework Core с точки зрения производительности и сравним его с Dapper используя актуальные версии на момент июля 2022 года. Посмотрим насколько рекомендация "перепишите все на Dapper" актуальна :)
 
